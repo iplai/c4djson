@@ -10,11 +10,10 @@ Besides, animation key frames are parsed as python list and userdata are parsed 
 A brief example:
 
 - The dict in python script [example 01](https://github.com/iplai/c4djson/blob/master/examples/01.Deformers%20and%20Animation.py):
-
+![](https://github.com/iplai/c4djson/raw/master/images/example01.code.png)
 - The output in c4d:
-
+![](https://github.com/iplai/c4djson/raw/master/images/example01.png)
 - The print output:
-
 ```json
 {
   O.null @ 'Deformed Cylinder': {
@@ -55,12 +54,10 @@ A brief example:
 ```
 
 The [dump](https://github.com/iplai/c4djson/blob/master/dump.py) function can do a reversed process of the former example:
-
 ```python
 from c4djson import dump
 dump(indent=2, ident=True)
 ```
-
 It can print the selected objects (include materials) as dict (same as the first picture) which can be directly used in python script.
 
 Installation
@@ -99,7 +96,7 @@ Tree({
 ## dump
 
 Put `dump.py` and `dump.tif` in your c4d scripts folder. Make it a button as the following gif do.
-
+![](https://github.com/iplai/c4djson/raw/master/images/dump.gif)
 
 Contributions
 =============
