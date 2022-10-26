@@ -4,7 +4,7 @@ Get IDs from official Python SDK document.
 import re, c4d, urllib.request
 
 prefix = "https://developers.maxon.net/docs/Cinema4DPythonSDK"
-prefix = "http://127.0.0.1:8090/docs/Cinema4DPythonSDK"
+# prefix = "http://127.0.0.1:8090/docs/Cinema4DPythonSDK"
 
 cates = [
     {
