@@ -1,6 +1,8 @@
 import c4d, enum
 
-__all__ = ["c4d", "Tree", "O", "T", "X", "F", "FL", "CT", "VP", "M", "Doc", "Command", "database", "dump"]
+__all__ = [
+    "c4d", "Tree", "O", "T", "X", "F", "FL", "CT", "VP", "M", "Doc", "Command", "database", "dump", "Node", "Param", "find_ident"
+]
 
 database = {}
 
