@@ -53,11 +53,10 @@ if __name__ == "__main__":
         },
     })
     doc.Flush()
-    gradient_node: Node = X.gradient
-    shader = tree.objects[gradient_node.link]
-    gradient: c4d.Gradient = shader[c4d.SLA_GRADIENT_GRADIENT]
+    gradient_shader = tree[X.gradient]
+    gradient: c4d.Gradient = gradient_shader[c4d.SLA_GRADIENT_GRADIENT]
     gradient.InvertKnots()
-    shader[c4d.SLA_GRADIENT_GRADIENT] = gradient
+    gradient_shader[c4d.SLA_GRADIENT_GRADIENT] = gradient
 
     tree.load().print()
 
