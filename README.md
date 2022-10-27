@@ -10,11 +10,16 @@ Besides, animation key frames are parsed as python list and userdata are parsed 
 A brief example:
 
 - The dict in python script [example 01](https://github.com/iplai/c4djson/blob/master/examples/01.Deformers%20and%20Animation.py):
+
 ![](https://github.com/iplai/c4djson/raw/master/images/example01.code.png)
+
 - The output in c4d:
+
 ![](https://github.com/iplai/c4djson/raw/master/images/example01.png)
+
 - The print output:
-```json
+
+```
 {
   O.null @ 'Deformed Cylinder': {
     O.sds: {
@@ -54,16 +59,19 @@ A brief example:
 ```
 
 The [dump](https://github.com/iplai/c4djson/blob/master/dump.py) function can do a reversed process of the former example:
+
 ```python
 from c4djson import dump
 dump(indent=2, ident=True)
 ```
+
 It can print the selected objects (include materials) as dict (same as the first picture) which can be directly used in python script.
 
 Installation
 ============
 
 Take the inner `c4djson` folder (not the root `c4djson` folder) in this repository, and put it under **any** of the following paths:
+
 ```
 C:\Program Files\Maxon Cinema 4D 2023\resource\modules\python\libs\python39
 C:\Users\Administrator\AppData\Roaming\Maxon\Maxon Cinema 4D 2023_BCDB4759\python39
@@ -74,28 +82,33 @@ C:\Users\Administrator\AppData\Roaming\Maxon\python\python39\libs
 C:\Users\Administrator\AppData\Roaming\Maxon\Maxon Cinema 4D 2023_BCDB4759\python39\libs
 C:\Program Files\Maxon Cinema 4D 2023\resource\modules\python\libs\python39.win64.framework\lib\site-packages
 ```
+
 The paths can be got by run this line of code in cinema 4d python console:
+
 ```python
 import sys;print("\n".join(sys.path))
 ```
+
 For my preference, I put it in the first one, which is the same path of c4d dummy package.
 
 Usage
 =====
 
-## load
+- Load
 
-Simply import all from c4djson you'd like to use in your scripts or plugins, 
-like you normally would:
+Simply import all from c4djson you'd like to use in your scripts or plugins, like you normally would:
+
 ```python
 from c4djson import *
 Tree({
     # Put your objects here as the first picture above.
 }).load().print()
 ```
-## dump
+
+- Dump
 
 Put `dump.py` and `dump.tif` in your c4d scripts folder. Make it a button as the following gif do.
+
 ![](https://github.com/iplai/c4djson/raw/master/images/dump.gif)
 
 Contributions
