@@ -6,7 +6,15 @@ database = {}
 
 
 class Type(enum.Enum):
-    pass
+    """This is a Fake definition.
+    Use pylance to color the node as Enum Member in vscode
+    "editor.semanticTokenColorCustomizations": {
+        "enabled": true,
+        "rules": {
+            "enumMember": "#bae02d",
+        }
+    }
+    """
 
 
 from c4djson.nodetype import Type
