@@ -91,7 +91,7 @@ The paths can be got by run this line of code in cinema 4d python console:
 import sys;print("\n".join(sys.path))
 ```
 
-For my preference, I put it in the first one, which is the same path of c4d dummy package.
+For my preference, I put it in the first one, which is the same path of `c4d` dummy package.
 
 Usage
 =====
