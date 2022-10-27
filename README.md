@@ -1,6 +1,6 @@
 # c4djson
 
-Examples Gallery: [Notion Page](https://iplai.notion.site/Text-spline-transition-69a75e4703bf4c139ec90666c78c28c3)
+[Notion Page](https://iplai.notion.site/Cinema-4D-0c6e076f872547008c16ac39588a4a51)
 
 Introduction
 ============
