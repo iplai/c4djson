@@ -13,7 +13,7 @@ A brief example:
 
 ![](https://github.com/iplai/c4djson/raw/master/images/example01.code.png)
 
-- The output in c4d:
+- Run the script then we get the objects in c4d:
 
 ![](https://github.com/iplai/c4djson/raw/master/images/example01.png)
 
