@@ -28,6 +28,7 @@ class Node:
     def __init__(self, type: Type):
         self.type = type
         self.obj = c4d.BaseList2D(type.value)
+        self._raw: c4d.BaseList2D = None
         if type.value not in self.raws:
             self.raws[type.value] = c4d.BaseList2D(type.value)
         self.default_name = self.obj.GetName()
@@ -71,7 +72,7 @@ class Node:
 
     @property
     def raw(self):
-        return self.raws[self.type.value]
+        return self._raw or self.raws[self.type.value]
 
     def is_track(self):
         return self.type.value == c4d.CTbase
@@ -451,11 +452,6 @@ _white_list = [  # No matter whether the param is same as it's default, dump it.
 ]
 _dynamic_defaults = [
     (_descid_d1(1016, 400006001, 1018740), 1),  # c4d.MG_OBJECT_ALIGN
-    (_descid_d1(1102, 15, 1018571), 6),         # c4d.MG_POLY_UPVECTOR
-    (_descid_d1(1106, 19, 1018571), 1),         # c4d.MG_POLY_SCALEONPOLY_AMOUNT
-    (_descid_d1(1122, 19, 1018573), 0.5),       # c4d.MG_POLYEDGE_OFFSET
-    (_descid_d1(1121, 19, 1018573), 0.5),       # c4d.MG_POLYEDGE_SCALE
-    (_descid_d1(1104, 400006001, 1018571), 1),  # c4d.MG_POLY_SELECTION_ACTIVE
 ]
 
 
@@ -470,7 +466,7 @@ class DocTree:
     def __init__(self) -> None:
         self.doc = c4d.documents.GetActiveDocument()
         data = {}
-        objects = self.doc.GetActiveObjects(c4d.GETACTIVEOBJECTFLAGS_NONE | c4d.GETACTIVEOBJECTFLAGS_SELECTIONORDER)
+        objects = self.doc.GetActiveObjects(c4d.GETACTIVEOBJECTFLAGS_NONE)  # | c4d.GETACTIVEOBJECTFLAGS_SELECTIONORDER
         materials = self.doc.GetActiveMaterials()
         for obj in objects:
             data |= self.parse_node(obj)
@@ -520,6 +516,17 @@ class DocTree:
 
     def parse_params(self, node: Node):
         data = {}
+        if node.type.value == 1018544:  # c4d.Omgcloner
+            if node.obj[c4d.ID_MG_MOTIONGENERATOR_MODE] == c4d.ID_MG_MOTIONGENERATOR_MODE_OBJECT:
+                param = Param(c4d.DescID(c4d.ID_MG_MOTIONGENERATOR_MODE), node)
+                data[param] = CycleVal(param, c4d.ID_MG_MOTIONGENERATOR_MODE_OBJECT)
+                node._raw = c4d.BaseObject(1018544)
+                node._raw[c4d.ID_MG_MOTIONGENERATOR_MODE] = c4d.ID_MG_MOTIONGENERATOR_MODE_OBJECT
+                obj = node.obj[c4d.MG_OBJECT_LINK]
+                param = Param(c4d.DescID(c4d.MG_OBJECT_LINK), node)
+                data[param] = Node.from_obj(obj) if obj else None
+                node._raw[c4d.MG_OBJECT_LINK] = obj
+                node._raw.Message(c4d.MSG_CHANGE)
         bc: c4d.BaseContainer
         descid: c4d.DescID
         for bc, descid, _ in node.obj.GetDescription(c4d.DESCFLAGS_DESC_NONE):
@@ -535,8 +542,8 @@ class DocTree:
                         continue
                 except AttributeError:
                     continue
-            if check_dynamic_default(descid, node):
-                continue
+            # if check_dynamic_default(descid, node):
+            #     continue
             param = Param(descid, node)
             if not param.ident:
                 continue
