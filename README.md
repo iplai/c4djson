@@ -104,6 +104,28 @@ Tree({
     # Put your objects here as the first picture above.
 }).load().print()
 ```
+Following is how the `load` and `print` defined.
+```python
+class Tree:
+  def load(self, replace=True):
+      """
+      Parse and load the python dict to c4d.
+      @param: replace
+          If true, remove existing highest level objects in c4d object
+              manager with same name and type as the correspondings in dict
+              and materials with same name.
+          If false, just load, don't check existing objects.
+      """
+  def print(self, indent=2, ident=False):
+      """
+      Print the parsed dict to console.
+      @param: indent
+          The space number of indent.
+      @param: ident
+          If true, print indentifier e.g."c4d.PRIM_CUBE_LEN".
+          If false, print name instead of indentifier e.g."Size".
+      """
+```
 
 - Dump
 
