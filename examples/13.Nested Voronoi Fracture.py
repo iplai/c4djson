@@ -2,7 +2,6 @@ from c4djson import *
 
 
 if __name__ == "__main__":
-    doc.Flush()
     # CPU killer!
     tree = Tree({
         O.connector @ "Geometry": {

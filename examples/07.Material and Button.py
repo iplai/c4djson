@@ -52,13 +52,10 @@ if __name__ == "__main__":
             c4d.MATERIAL_USE_TRANSPARENCY: True,
         },
     })
-    doc.Flush()
     gradient_shader = tree[X.gradient]
     gradient: c4d.Gradient = gradient_shader[c4d.SLA_GRADIENT_GRADIENT]
     gradient.InvertKnots()
     gradient_shader[c4d.SLA_GRADIENT_GRADIENT] = gradient
-
     tree.load().print()
-
     Command.unfoldall()
     # Command.playforward()

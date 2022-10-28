@@ -32,7 +32,6 @@ if __name__ == "__main__":
             c4d.ID_MG_BASEEFFECTOR_COLOR_BLEND: c4d.ID_MG_BASEEFFECTOR_COLOR_BLEND_ADD,
         },
     })
-    doc.Flush()
     tree.load().print()
     Command.unfoldall()
     # Command.playforward()

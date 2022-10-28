@@ -150,7 +150,7 @@ if __name__ == "__main__":
         {
             "name": "Snowflake",
             "premise": "F--F--F",
-            "rules": "F=F+F--F+F",
+            "rules": """F="(pow(1/3;(_growth-1))))F+F--F+F""",
             "baseangle": 60,
             "range": (0, 8, 3),
         },
@@ -272,4 +272,4 @@ if __name__ == "__main__":
         },
     })
     doc.Flush()
-    tree.load().print(ident=True)
+    tree.load().print()

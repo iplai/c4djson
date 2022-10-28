@@ -42,12 +42,10 @@ if __name__ == "__main__":
                 c4d.ID_MG_BASEEFFECTOR_SCALE_ACTIVE: True,
                 c4d.ID_MG_BASEEFFECTOR_UNIFORMSCALE: True,
                 c4d.ID_MG_BASEEFFECTOR_USCALE: 0.2,
-                # c4d.ID_MG_BASEEFFECTOR_COLOR_MODE: c4d.ID_MG_BASEEFFECTOR_COLOR_MODE_EFFECTOR,
-                # c4d.ID_MG_BASEEFFECTOR_COLOR_BLEND: c4d.ID_MG_BASEEFFECTOR_COLOR_BLEND_ADD,
+                c4d.ID_MG_BASEEFFECTOR_COLOR_MODE: c4d.ID_MG_BASEEFFECTOR_COLOR_MODE_EFFECTOR,
+                c4d.ID_MG_BASEEFFECTOR_COLOR_BLEND: c4d.ID_MG_BASEEFFECTOR_COLOR_BLEND_ADD,
             },
         },
     })
-    doc.Flush()
     tree.load().print()
-    # doc.SetSelection(tree.root.obj)
     Command.unfoldall()

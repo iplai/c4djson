@@ -36,7 +36,6 @@ if __name__ == "__main__":
         },
     })
 
-    doc.Flush()
     spline: c4d.SplineObject = tree[O.spline]
     spline.ResizeObject(len(points))
     spline.SetAllPoints(points)

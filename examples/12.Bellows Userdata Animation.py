@@ -33,7 +33,6 @@ def main():
 """
 if __name__ == "__main__":
     database.pop("Bellows", None)
-    doc.Flush()
     Tree({
         O.python @ "Bellows Generator": {
             c4d.OPYTHON_CODE: code,

@@ -31,7 +31,6 @@ if __name__ == "__main__":
             c4d.PRIM_CUBE_SUBZ: 6,
         },
     })
-    doc.Flush()
     tree.load().print()
     Command.unfoldall()
     Command.playforward()

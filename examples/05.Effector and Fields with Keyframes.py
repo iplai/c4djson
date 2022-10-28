@@ -27,7 +27,6 @@ if __name__ == "__main__":
             },
         },
     })
-    doc.Flush()
     tree.load().print()
     Command.unfoldall()
-    # Command.playforward()
+    Command.playforward()
