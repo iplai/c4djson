@@ -152,7 +152,7 @@ class CycleVal:
 
     def __repr__(self):
         ident = self.param[c4d.DESC_CYCLESYMBOLS][self.value]
-        return f"c4d.{ident}" if ident else self.value
+        return f"c4d.{ident}" if ident else str(self.value)
 
 
 class Userdata(Param):
@@ -489,7 +489,6 @@ class DocTree:
                 data.pop(node)
                 return data
         branches = obj.GetBranchInfo(c4d.GETBRANCHINFO_ONLYWITHCHILDREN) or []
-        branchdata: dict
         for branchdata in branches:
             gelisthead: c4d.GeListHead = branchdata.get("head")
             branchid: int = branchdata.get("id")
@@ -506,7 +505,7 @@ class DocTree:
                 child = child.GetNext()
             if len(data[node][branchname]) == 0:
                 data[node].pop(branchname, None)
-        if isinstance(obj, c4d.BaseObject):
+        if isinstance(obj, (c4d.BaseObject, c4d.BaseShader)):
             for child in obj.GetChildren():
                 data[node] |= self.parse_node(child)
         return data
