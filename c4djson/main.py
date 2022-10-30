@@ -87,7 +87,7 @@ class Node:
         if isinstance(self.obj, c4d.BaseObject) and isinstance(parent.obj, c4d.BaseObject):
             self.obj.InsertUnderLast(parent.obj)
         if isinstance(self.obj, c4d.BaseTag) and isinstance(parent.obj, c4d.BaseObject):
-            parent.obj.InsertTag(self.obj)
+            parent.obj.InsertTag(self.obj, pred=parent.obj.GetLastTag())
         if isinstance(self.obj, c4d.BaseShader) and isinstance(parent.obj, c4d.BaseList2D):
             parent.obj.InsertShader(self.obj)
         if isinstance(self.obj, c4d.CTrack) and isinstance(parent.obj, c4d.BaseList2D):
@@ -268,7 +268,7 @@ class Tree:
                     continue
                 param = key
                 # When param is c4d.FIELDS
-                if param.descid[0].id == c4d.FIELDS:
+                if param[c4d.DESC_CUSTOMGUI] == c4d.CUSTOMGUI_FIELDLIST:
                     val: dict
                     self.parse_params(val)
                     fieldlist = c4d.FieldList()
@@ -427,7 +427,7 @@ class Tree:
 #  DataTag in Cloner, VariableTag in Particle Emitter
 _tids_not_to_parse = [
     c4d.ID_MOTAGDATA, c4d.Tparticle, c4d.Tcacheproxytagpolyselection, c4d.Tcacheproxytagedgeselection,
-    c4d.Tpoint, c4d.Ttangent
+    c4d.Tpoint, c4d.Tpolygon, c4d.Ttangent
 ]
 
 
@@ -498,10 +498,11 @@ class DocTree:
                 continue
             data[node][branchname] = {}
             while child is not None:
-                if isinstance(child, c4d.BaseTag):  # reverse the sequence for tags
-                    data[node][branchname] = self.parse_node(child) | data[node][branchname]
-                else:
-                    data[node][branchname] |= self.parse_node(child)
+                # if isinstance(child, c4d.BaseTag):  # reverse the sequence for tags
+                #     data[node][branchname] = self.parse_node(child) | data[node][branchname]
+                # else:
+                #     data[node][branchname] |= self.parse_node(child)
+                data[node][branchname] |= self.parse_node(child)
                 child = child.GetNext()
             if len(data[node][branchname]) == 0:
                 data[node].pop(branchname, None)
@@ -674,6 +675,7 @@ class DocTree:
                 return pdata
             else:
                 return self.find_parent(pdata, descid)
+        return {}
 
     def print(self, indent=2, ident=False):
         print(dict2str(self.data, indent=indent, ident=ident))
@@ -1268,5 +1270,6 @@ class Doc(Type):
 
 
 if __name__ == "__main__":
-    import importlib, c4djson.main
+    import importlib, c4djson.main, c4djson
     importlib.reload(c4djson.main)
+    importlib.reload(c4djson)
