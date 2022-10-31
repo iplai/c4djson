@@ -27,10 +27,10 @@ class Node:
 
     def __init__(self, type: Type):
         self.type = type
-        self.obj = c4d.BaseList2D(type.value)
-        self._raw: c4d.BaseList2D = None
         if type.value not in self.raws:
             self.raws[type.value] = c4d.BaseList2D(type.value)
+        self.obj = c4d.BaseList2D(type.value)
+        self._raw: c4d.BaseList2D = None
         self.default_name = self.obj.GetName()
         self.parent: Node = None
 
@@ -57,9 +57,9 @@ class Node:
 
     @property
     def name(self):
-        try:
+        if self.obj.IsAlive():
             return self.obj.GetName().replace(" . ", ".")
-        except ReferenceError:
+        else:
             return self.default_name
 
     @name.setter
@@ -408,7 +408,10 @@ class Tree:
                     old = self.doc.SearchMaterial(node.name)
                     if old is not None and old.GetType() == node.type.value:
                         old.Remove()
+                # When there's no mat in mat manager, the insert operation may lose it's name
+                name = node.name
                 self.doc.InsertMaterial(node.obj)
+                node.name = name  # Restore it's name
                 self.doc.AddUndo(c4d.UNDOTYPE_NEWOBJ, node.obj)
         self.doc.EndUndo()
         c4d.EventAdd()
