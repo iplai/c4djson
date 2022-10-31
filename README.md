@@ -2,8 +2,9 @@
 
 [![LICENSE](https://img.shields.io/github/license/iplai/c4djson)](LICENSE)
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/)
+[![Cinema 4D](https://img.shields.io/badge/Cinema%204D-R26%2B-blue)](http://www.maxon.net)
 
-### Examples Gallery:
+### Examples Gallery: [🔗 Notion Page](https://iplai.notion.site/Cinema-4D-0c6e076f872547008c16ac39588a4a51)
 [![Notion Page](images/notion%20screenshot.png)](https://iplai.notion.site/Cinema-4D-0c6e076f872547008c16ac39588a4a51)
 
 Introduction
