@@ -1,5 +1,8 @@
 # c4djson
 
+[![Python 3.9](https://img.shields.io/github/license/iplai/c4djson)](LICENSE)
+[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/)
+
 Examples Gallery :  [Notion Page](https://iplai.notion.site/Cinema-4D-0c6e076f872547008c16ac39588a4a51)
 
 Introduction
