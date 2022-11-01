@@ -151,8 +151,11 @@ class CycleVal:
         return f"{name}" if name else self.value
 
     def __repr__(self):
-        ident = self.param[c4d.DESC_CYCLESYMBOLS][self.value]
-        return f"c4d.{ident}" if ident else str(self.value)
+        if self.param[c4d.DESC_CYCLESYMBOLS] is not None:
+            ident = self.param[c4d.DESC_CYCLESYMBOLS][self.value]
+            return f"c4d.{ident}" if ident else str(self.value)
+        else:
+            return str(self.value)
 
 
 class Userdata(Param):
@@ -551,6 +554,7 @@ class DocTree:
             if not param.ident:
                 continue
             val = self.convert_value(param, node.obj[descid])
+            val = self.parse_prs(param, val)
             if param[c4d.DESC_CYCLE] is not None:
                 val = CycleVal(param, val)
             if val is not None:
@@ -614,8 +618,21 @@ class DocTree:
                     val = tuple(round(i) for i in val)
             if val.count(val[0]) == len(val):
                 val = (val[0],)
-        if isinstance(val, float) and val == round(val):
+            val = tuple(round(i) if abs(i - round(i)) < 1e-14 else i for i in val)
+        if isinstance(val, float) and abs(val - round(val)) < 1e-14:
             val = round(val)
+        return val
+
+    def parse_prs(self, param: Param, val: tuple):
+        if param.descid[0].id in [
+            c4d.ID_BASEOBJECT_REL_POSITION, c4d.ID_BASEOBJECT_REL_POSITION, c4d.ID_BASEOBJECT_REL_POSITION
+        ]:
+            if val.count(0) == 2:
+                for i, v in enumerate(val):
+                    if v != 0:
+                        desclevel = c4d.DescLevel([c4d.VECTOR_X, c4d.VECTOR_Y, c4d.VECTOR_Z][i])
+                        param.descid.PushId(desclevel)
+                        return v
         return val
 
     def parse_track(self, node: Node):
