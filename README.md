@@ -1,8 +1,10 @@
-# c4djson
+# c4djson 
 
 [![LICENSE](https://img.shields.io/github/license/iplai/c4djson)](LICENSE)
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Cinema 4D](https://img.shields.io/badge/Cinema%204D-R26%2B-blue)](http://www.maxon.net)
+
+A fantastic module to create c4d scenes programmatically.
 
 ### Examples Gallery: [🔗 Notion Page](https://iplai.notion.site/Cinema-4D-0c6e076f872547008c16ac39588a4a51)
 [![Notion Page](images/notion%20screenshot.png)](https://iplai.notion.site/Cinema-4D-0c6e076f872547008c16ac39588a4a51)
@@ -10,11 +12,11 @@
 Introduction
 ============
 
-The `c4djson` is a useful module to load and dump objects with [CINEMA 4D](http://www.maxon.net) in python dict format which is similar to the standard python json module.
+The `c4djson` is a module to load and dump objects with [CINEMA 4D](http://www.maxon.net) in python dict format inspired by the standard python json module.
 
-It uses json structure (dict in python) to mimic the hierarchy of object manager in cinema 4d in a brief way, both for build and for show. It can free you from a mass of parameter settings by only focusing on changed paramters.
+The key feature is using json structure (dict in python) to mimic the hierarchy of object manager in cinema 4d, both for build and for show. It can free you from a mass of parameter settings by only focusing on changed paramters.
 
-Besides, animation key frames are parsed as python list and userdata are parsed as python dict. Thus, a simple c4d document can be saved as a python script!
+Besides, animation key frames are parsed as python list(contains key frames definition tuple) and userdata are parsed as python dict. Thus, a simple c4d document can be saved as a python script!
 
 A brief example:
 
