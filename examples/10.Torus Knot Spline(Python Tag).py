@@ -4,7 +4,7 @@ code = """import c4d
 from math import sin, cos, pi as π
 def main():
     spline: c4d.SplineObject = op.GetObject()
-    samples = spline[c4d.ID_USERDATA, 2]
+    samples = spline[c4d.ID_USERDATA, 2] or 2
     R = spline[c4d.ID_USERDATA, 3]
     r = spline[c4d.ID_USERDATA, 4]
     q = spline[c4d.ID_USERDATA, 5]

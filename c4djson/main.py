@@ -10,12 +10,14 @@ database = {}
 class Type(enum.Enum):
     """This is a Fake definition.
     Use pylance to color the node as Enum Member in vscode
+    ```
     "editor.semanticTokenColorCustomizations": {
         "enabled": true,
         "rules": {
             "enumMember": "#bae02d",
         }
     }
+    ```
     """
 
 
@@ -676,8 +678,11 @@ class DocTree:
                 for key, val in bc:
                     if bc_tem[key] == val:
                         continue
-                    if key in [c4d.DESC_NAME, c4d.DESC_SHORT_NAME, c4d.DESC_PARENTGROUP]:
+                    if key in [c4d.DESC_NAME, c4d.DESC_PARENTGROUP]:
                         continue
+                    if key == c4d.DESC_SHORT_NAME:
+                        if val == bc[c4d.DESC_NAME]:
+                            continue
                     userdata_key = UserdataKey(key)
                     if key in UserdataKey.value_keys:
                         val = self.convert_value(userdata, val)
