@@ -444,16 +444,17 @@ def _descid_d1(*args):
 
 
 _black_list = [
-    _descid_d1(900, 130, 110050),               # c4d.ID_BASELIST_NAME,
-    _descid_d1(1041671, 3, 110050),             # c4d.ID_BASELIST_ICON_COLOR,
-    _descid_d1(910, 23, 5155),                  # c4d.ID_BASEOBJECT_GLOBAL_POSITION,
-    _descid_d1(925, 23, 5155),                  # c4d.ID_BASEOBJECT_ABS_POSITION,
-    _descid_d1(911, 23, 5155),                  # c4d.ID_BASEOBJECT_GLOBAL_ROTATION,
-    _descid_d1(926, 23, 5155),                  # c4d.ID_BASEOBJECT_ABS_ROTATION,
-    _descid_d1(1204, 19, 1000988),              # c4d.PRIM_REGULARWIDTH,
-    _descid_d1(901, 3, 5350),                   # c4d.ID_CTRACK_FCURVE_COLOR
-    _descid_d1(200000029, 200000027, 1001074),  # c4d.ID_MATERIALASSIGNMENTS,
-    _descid_d1(1204, 400006001, 431000028),     # c4d.O_BEVELL_SHAPING_CONSTANT,
+    _descid_d1(900, 130, 110050),                 # c4d.ID_BASELIST_NAME,
+    _descid_d1(1041671, 3, 110050),               # c4d.ID_BASELIST_ICON_COLOR,
+    _descid_d1(910, 23, 5155),                    # c4d.ID_BASEOBJECT_GLOBAL_POSITION,
+    _descid_d1(925, 23, 5155),                    # c4d.ID_BASEOBJECT_ABS_POSITION,
+    _descid_d1(911, 23, 5155),                    # c4d.ID_BASEOBJECT_GLOBAL_ROTATION,
+    _descid_d1(926, 23, 5155),                    # c4d.ID_BASEOBJECT_ABS_ROTATION,
+    _descid_d1(1204, 19, 1000988),                # c4d.PRIM_REGULARWIDTH,
+    _descid_d1(901, 3, 5350),                     # c4d.ID_CTRACK_FCURVE_COLOR
+    _descid_d1(200000029, 200000027, 1001074),    # c4d.ID_MATERIALASSIGNMENTS,
+    _descid_d1(1204, 400006001, 431000028),       # c4d.O_BEVELL_SHAPING_CONSTANT,
+    _descid_d1(440000308, 400006001, 440000249),  # c4d.ID_FIELDLAYER_ENABLE_DIRECTION,
 ]
 _white_list = [  # No matter whether the param is same as it's default, dump it.
     _descid_d1(1204, 15, 1018583),              # c4d.MG_GRID_MODE,
@@ -540,7 +541,7 @@ class DocTree:
         for bc, descid, _ in node.obj.GetDescription(c4d.DESCFLAGS_DESC_NONE):
             if descid.GetDepth() == 0:
                 continue
-            # if descid[0].id == c4d.MG_GRID_MODE:
+            # if descid[0].id == c4d.ID_FIELDLAYER_ENABLE_DIRECTION:
             #     print(bc[c4d.DESC_NAME], descid)
             if any(descid == id for id in _black_list):
                 continue
