@@ -255,7 +255,7 @@ class Tree:
                 descid = c4d.DescID(*[c4d.DescLevel(i) for i in key])
                 param = Param(descid, parent)
                 key = param
-            if isinstance(key, Param) and type(val) == dict:
+            if isinstance(key, Param) and key.descid[0].id == c4d.FIELDS:
                 val = self.parse_nodes(val, parent)
             result[key] = val
         return result
@@ -327,6 +327,10 @@ class Tree:
         if param[c4d.DESC_CUSTOMGUI] == c4d.CUSTOMGUI_COLOR:
             x, y, z = map(lambda i: i / 255, (val.x, val.y, val.z))
             val = c4d.Vector(x, y, z)
+        if param[c4d.DESC_CUSTOMGUI] == c4d.CUSTOMGUI_FONTCHOOSER:
+            font = c4d.FontData()
+            font.SetFont(dict2bc(val))
+            val = font
         if isinstance(val, Node):
             val = self.objects[val.link]
         if isinstance(val, (tuple, list)) and all(isinstance(i, Node) for i in val):
@@ -588,8 +592,6 @@ class DocTree:
         if isinstance(val, c4d.FontData):
             bc = val.GetFont()
             val = {k: v for k, v in bc} or None
-            if val is not None:
-                val = {"CustomDataType": "FontData"} | val
         if isinstance(val, c4d.SplineData):
             val = None
         if isinstance(val, c4d.BitmapButtonStruct):
