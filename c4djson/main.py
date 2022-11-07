@@ -135,13 +135,15 @@ class Param:
     @property
     def ident(self):
         if self.descid.GetDepth() == 2:
-            descid = c4d.DescID(self.descid[0])
-            bc = self.description.GetParameter(descid)
-            ident = self.bc[c4d.DESC_IDENT]
-            ident = f"c4d.{ident}" if ident else self.descid[1].id
-            return f"(c4d.{bc[c4d.DESC_IDENT]}, {ident})"
-        ident = self.bc[c4d.DESC_IDENT]
-        return f"c4d.{ident}" if ident else ""
+            descid_0 = c4d.DescID(self.descid[0])
+            bc_0 = self.description.GetParameter(descid_0)
+            ident_0 = bc_0[c4d.DESC_IDENT]
+            ident_0 = f"c4d.{ident_0}" if ident_0 else descid_0[0].id
+            ident_1 = self.bc[c4d.DESC_IDENT]
+            ident_1 = f"c4d.{ident_1}" if ident_1 else self.descid[1].id
+            return f"({ident_0}, {ident_1})"
+        ident_0 = self.bc[c4d.DESC_IDENT]
+        return f"c4d.{ident_0}" if ident_0 else str(self.descid[0].id)
 
 
 class CycleVal:
@@ -547,25 +549,36 @@ class DocTree:
                 continue
             # if descid[0].id == c4d.ID_FIELDLAYER_ENABLE_DIRECTION:
             #     print(bc[c4d.DESC_NAME], descid)
-            if any(descid == id for id in _black_list):
+            if descid in _black_list:
                 continue
-            if not any(descid == id for id in _white_list):
+            if descid not in _white_list:
                 try:
-                    if node.obj[descid] == node.raw[descid]:
-                        continue
+                    current_val = node.obj[descid]
                 except AttributeError:
                     continue
+                try:
+                    default_val = node.raw[descid]
+                    if current_val == default_val:
+                        continue
+                except AttributeError:
+                    ...
             # if check_dynamic_default(descid, node):
             #     continue
             param = Param(descid, node)
-            if not param.ident:
+            if not param.name:
                 continue
+            try:
+                node.raw[descid] = node.obj[descid]
+                node.raw.Message(c4d.MSG_CHANGE)
+            except TypeError:
+                ...
             val = self.convert_value(param, node.obj[descid])
             val = self.parse_prs(param, val)
             if param[c4d.DESC_CYCLE] is not None:
                 val = CycleVal(param, val)
             if val is not None:
                 data[param] = val
+        del Node.raws[node.type.value]
         return data
 
     def convert_value(self, param: Param, val):
@@ -739,6 +752,8 @@ def dict2str(data: dict, indent=2, depth=0, ident=False):
             if isinstance(val, list) and any(isinstance(i, KeyFrame) for i in val):
                 if ident and key.name:
                     output += f"{s}# Animate {key.name}\n"
+            if "c4d." not in key.ident and key.name and newline:
+                e = f", # {key.name}\n"
         if isinstance(val, UserdataVal) and type(val.value) == dict:
             val = dict2str(val.value, indent, depth + 1, ident)
         if type(val) == dict:
