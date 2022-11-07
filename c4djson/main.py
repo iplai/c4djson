@@ -34,6 +34,7 @@ class Node:
         self.obj = c4d.BaseList2D(type.value)
         self._raw: c4d.BaseList2D = None
         self.default_name = self.obj.GetName()
+        # self._name = self.obj.GetName()
         self.parent: Node = None
 
     def __repr__(self):
@@ -63,10 +64,12 @@ class Node:
             return self.obj.GetName().replace(" . ", ".")
         else:
             return self.default_name
+            # return self._name or self.default_name
 
     @name.setter
     def name(self, name: str):
         self.obj.SetName(name)
+        # self._name = name
 
     @property
     def link(self):
@@ -257,7 +260,7 @@ class Tree:
                 descid = c4d.DescID(*[c4d.DescLevel(i) for i in key])
                 param = Param(descid, parent)
                 key = param
-            if isinstance(key, Param) and key.descid[0].id == c4d.FIELDS:
+            if isinstance(key, Param) and key[c4d.DESC_CUSTOMGUI] == c4d.CUSTOMGUI_FIELDLIST:
                 val = self.parse_nodes(val, parent)
             result[key] = val
         return result
