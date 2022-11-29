@@ -4,7 +4,7 @@ Get IDs from official Python SDK document.
 import re, c4d, urllib.request
 
 prefix = "https://developers.maxon.net/docs/Cinema4DPythonSDK"
-# prefix = "http://127.0.0.1:8090/docs/Cinema4DPythonSDK"
+prefix = "http://127.0.0.1:8090/docs/Cinema4DPythonSDK"
 
 cates = [
     {
@@ -71,12 +71,14 @@ def crawl():
                     name = f"{code.lower()}{name}"
                 try:
                     c4d.__dict__[ident]
-                    items[name] = f"c4d.{ident}"
+                    # items[name] = f"c4d.{ident}"
+                    items[name] = c4d.__dict__[ident]
                 except KeyError:
                     ident_new = code + name.title()
                     c4d.__dict__[ident_new]
                     print(f"'{ident}' not in c4d, try '{ident_new}'", end="\n\n")
-                    items[name] = f"c4d.{ident_new}"
+                    # items[name] = f"c4d.{ident_new}"
+                    items[name] = c4d.__dict__[ident_new]
     for cate in cates:
         items: dict[str, int]
         path, code, items = cate.values()

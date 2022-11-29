@@ -137,6 +137,7 @@ class Tree:
           If false, print name instead of indentifier e.g."Size".
       """
 ```
+> Note: `c4djson.core` will overtake `c4djson.main` next version. Since the former has clearer coding and better robustness, it is recommended to use `c4djson.core.Tree` instead of `c4djson.main.Tree` ! 
 
 - Dump
 

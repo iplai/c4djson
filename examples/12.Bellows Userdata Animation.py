@@ -1,6 +1,6 @@
-from c4djson import *
+from c4djson.core import *
 
-code = r"""from c4djson import *
+code = r"""from c4djson.core import *
 def main():
     angle = op[c4d.ID_USERDATA, 3]
     amin, amax = map(c4d.utils.DegToRad, (5, 90))
@@ -26,43 +26,60 @@ def main():
             },
         },
     })
-    if "Bellows" not in database:
-        tree.print()
-        database["Bellows"] = True
     return tree[O.null @ "Root"]
 """
 if __name__ == "__main__":
-    database.pop("Bellows", None)
     Tree({
-        O.python @ "Bellows Generator": {
+        O.python @ 'Bellows Generator': {
             c4d.OPYTHON_CODE: code,
             c4d.ID_USERDATA: {
-                "Bellows": {  # 1
-                    "Segments": {  # 2
-                        c4d.DTYPE_: c4d.DTYPE_LONG,
-                        c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_LONGSLIDER,
-                        c4d.DESC_UNIT: c4d.DESC_UNIT_LONG,
-                        c4d.DESC_DEFAULT: 15,
-                        c4d.DESC_STEP: 2,
-                        c4d.DESC_MINSLIDER: 3,
-                        c4d.DESC_MAXSLIDER: 50,
-                    },
-                    "End Angle": {  # 3
-                        c4d.DTYPE_: c4d.DTYPE_REAL,
-                        c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_REALSLIDER,
-                        c4d.DESC_UNIT: c4d.DESC_UNIT_DEGREE,
-                        c4d.DESC_DEFAULT: 40,
-                        c4d.DESC_MINSLIDER: 5,
-                        c4d.DESC_MAXSLIDER: 90,
-                        c4d.DESC_STEP: 1,
-                    },
-                }
+                (c4d.ID_USERDATA, 1): {
+                    c4d.DTYPE_: c4d.DTYPE_GROUP,
+                    c4d.DESC_NAME: 'Bellows',
+                    c4d.DESC_SHORT_NAME: 'Bellows',
+                    c4d.DESC_PARENTGROUP: (),
+                    c4d.DESC_TITLEBAR: 1,
+                },
+                (c4d.ID_USERDATA, 2): {
+                    c4d.DTYPE_: c4d.DTYPE_LONG,
+                    c4d.DESC_NAME: 'Segments',
+                    c4d.DESC_SHORT_NAME: 'Segments',
+                    c4d.DESC_MIN: -2147483648,
+                    c4d.DESC_MAX: 2147483647,
+                    c4d.DESC_MINEX: 0,
+                    c4d.DESC_MAXEX: 0,
+                    c4d.DESC_STEP: 2,
+                    c4d.DESC_UNIT: c4d.DESC_UNIT_INT,
+                    c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_LONGSLIDER,
+                    c4d.DESC_PARENTGROUP: ((700, 5, 0), (1, 1, 0)),
+                    c4d.DESC_DEFAULT: 15,
+                    c4d.DESC_MINSLIDER: 3,
+                    c4d.DESC_MAXSLIDER: 50,
+                },
+                (c4d.ID_USERDATA, 3): {
+                    c4d.DTYPE_: c4d.DTYPE_REAL,
+                    c4d.DESC_NAME: 'End Angle',
+                    c4d.DESC_SHORT_NAME: 'End Angle',
+                    c4d.DESC_MIN: -5.7296e+21,
+                    c4d.DESC_MAX: 5.7296e+21,
+                    c4d.DESC_MINEX: 0,
+                    c4d.DESC_MAXEX: 0,
+                    c4d.DESC_STEP: 1,
+                    c4d.DESC_UNIT: c4d.DESC_UNIT_DEGREE,
+                    c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_REALSLIDER,
+                    c4d.DESC_PARENTGROUP: ((700, 5, 0), (1, 1, 0)),
+                    c4d.DESC_DEFAULT: 40,
+                    c4d.DESC_MINSLIDER: 5,
+                    c4d.DESC_MAXSLIDER: 90,
+                },
             },
-            (c4d.ID_USERDATA, 3): [(0, 30), (15, 90)],
-            CT.base: {  # Track of the userdata animation
-                c4d.ID_CTRACK_AFTER: c4d.ID_CTRACK_OSCILLATE,
-            },
+            # Segments
+            (c4d.ID_USERDATA, 2): 15,
+            # Animated End Angle
+            (c4d.ID_USERDATA, 3): [
+                (0, 30),
+                (15, 90),
+                {c4d.ID_CTRACK_AFTER: c4d.ID_CTRACK_OSCILLATE},
+            ],
         },
-    }).load().print()
-    Command.unfoldall()
-    Command.playforward()
+    }).load()

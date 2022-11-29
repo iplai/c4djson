@@ -1,4 +1,4 @@
-from c4djson import *
+from c4djson.core import *
 from math import sqrt, sin, cos, pi as π
 
 
@@ -22,16 +22,19 @@ if __name__ == "__main__":
 
     tree = Tree({
         O.spline: {
-            c4d.SPLINEOBJECT_CLOSED: True,
             c4d.SPLINEOBJECT_TYPE: c4d.SPLINEOBJECT_TYPE_CUBIC,
+            # Close Spline
+            c4d.SPLINEOBJECT_CLOSED: True,
         },
         # The difference is Formula Spline cannot close spline unless make editable
         O.splineformula: {
+            # Position.X
             (c4d.ID_BASEOBJECT_REL_POSITION, c4d.VECTOR_X): 500,
             c4d.PRIM_FORMULA_X: f"({R} + {r} * cos(pi * t * {p})) * cos(pi * t * {q})",
             c4d.PRIM_FORMULA_Y: f"({R} + {r} * cos(pi * t * {p})) * sin(pi * t * {q})",
             c4d.PRIM_FORMULA_Z: f"{r} * sin(pi * t * {p})",
             c4d.PRIM_FORMULA_SAMPLES: samples,
+            # Cubic Interpolation
             c4d.PRIM_FORMULA_CUBIC: True,
         },
     })
@@ -40,8 +43,7 @@ if __name__ == "__main__":
     spline.ResizeObject(len(points))
     spline.SetAllPoints(points)
     spline.Message(c4d.MSG_UPDATE)
-    tree.load().print()
+    tree.load()
 
     doc.SetSelection(spline)
     doc.SetMode(c4d.Mpoints)
-    Command.unfoldall()

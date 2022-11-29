@@ -1,4 +1,6 @@
-from c4djson import *
+from c4djson.core import *
+
+doc.Flush()
 
 
 def reverse_formula(formula: list[str]):
@@ -83,11 +85,13 @@ if __name__ == "__main__":
             },
         }
         currframe += frames
-
     tree = Tree({
         O.mgcloner @ 'Grid Cube Cloner': {
+            # Count.Y
+            (c4d.MG_GRID_RESOLUTION, c4d.VECTOR_Y): 3,
+            c4d.MG_GRID_MODE: c4d.MG_GRID_MODE_PERSTEP,
+            # Effectors
             c4d.ID_MG_MOTIONGENERATOR_EFFECTORLIST: list(effectors.keys()),
-            c4d.MG_GRID_RESOLUTION: (3, 3, 3),
             O.cube @ 'Grid Cube': {
                 c4d.PRIM_CUBE_LEN: (unit, unit, unit),
                 c4d.PRIM_CUBE_DOFILLET: True,
@@ -96,12 +100,13 @@ if __name__ == "__main__":
         },
         O.mgcloner @ 'Colored Cube Cloner': {
             c4d.ID_MG_MOTIONGENERATOR_MODE: c4d.ID_MG_MOTIONGENERATOR_MODE_OBJECT,
-            c4d.ID_MG_MOTIONGENERATOR_EFFECTORLIST: [O.mgplain @ "Colors"] + list(effectors.keys()),
-            c4d.MG_OBJECT_ALIGN: True,
             c4d.MG_OBJECT_LINK: O.cube @ 'Cube to clone colored cube on',
+            # Distribution: Polygon Center
             c4d.MG_POLY_MODE_: c4d.MG_POLY_MODE_POLY,
-            c4d.MG_POLY_UPVECTOR: c4d.MG_POLY_UPVECTOR_NONE,
+            # Effectors
+            c4d.ID_MG_MOTIONGENERATOR_EFFECTORLIST: [O.mgplain @ "Colors"] + list(effectors.keys()),
             O.cube @ 'Colored Cube': {
+                # Size
                 c4d.PRIM_CUBE_LEN: (unit * 0.9, unit * 0.9, thickness),
                 c4d.PRIM_CUBE_DOFILLET: True,
                 T.phong: {c4d.PHONGTAG_PHONG_ANGLELIMIT: True}, },
@@ -137,19 +142,21 @@ if __name__ == "__main__":
             }
         },
         O.cube @ 'Cube to clone colored cube on': {
-            c4d.ID_BASEOBJECT_VISIBILITY_EDITOR: c4d.MODE_OFF,
-            c4d.ID_BASEOBJECT_VISIBILITY_RENDER: c4d.MODE_OFF,
-            c4d.PRIM_CUBE_LEN: (unit * 3, unit * 3, unit * 3),
+            # Viewport Visibility: Off
+            c4d.ID_BASEOBJECT_VISIBILITY_EDITOR: c4d.OBJECT_OFF,
+            # Renderer Visibility: Off
+            c4d.ID_BASEOBJECT_VISIBILITY_RENDER: c4d.OBJECT_OFF,
+            # Size
+            c4d.PRIM_CUBE_LEN: (300,),
+            # Segments X
             c4d.PRIM_CUBE_SUBX: 3,
+            # Segments Y
             c4d.PRIM_CUBE_SUBY: 3,
+            # Segments Z
             c4d.PRIM_CUBE_SUBZ: 3,
         },
         O.null @ "Effectors": effectors,
         O.null @ "Fields": fields,
     })
-    doc.Flush()
-    tree.load().print()
-
+    tree.load(dumpWhenLoaded=False)
     doc.SetMaxTime(c4d.BaseTime(currframe / doc.GetFps()))
-    Command.unfoldall()
-    Command.playforward()

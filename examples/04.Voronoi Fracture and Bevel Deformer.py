@@ -25,7 +25,7 @@ if __name__ == "__main__":
             c4d.ID_BASEOBJECT_VISIBILITY_EDITOR: c4d.OBJECT_OFF,
             c4d.ID_BASEOBJECT_VISIBILITY_RENDER: c4d.OBJECT_OFF,
             c4d.ID_BASEOBJECT_XRAY: True,
-            c4d.PRIM_CUBE_LEN: (round(200 * 6 / 7, 2),),
+            c4d.PRIM_CUBE_LEN: (200 * 6 / 7,),
             c4d.PRIM_CUBE_SUBX: 6,
             c4d.PRIM_CUBE_SUBY: 6,
             c4d.PRIM_CUBE_SUBZ: 6,

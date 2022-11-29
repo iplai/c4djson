@@ -1,15 +1,16 @@
-from c4djson import *
+from c4djson.core import *
 
-code = """from c4djson import *
+
+code = """from c4djson.core import *
 
 def init():
-    curve = database["curves"][op[c4d.ID_USERDATA, 2]]
+    curve = Tree.database["curves"][op[c4d.ID_USERDATA, 2]]
     op[c4d.ID_USERDATA, 3] = curve["range"][2]
     op[c4d.ID_USERDATA, 4] = curve["premise"]
     op[c4d.ID_USERDATA, 5] = curve["rules"]
     # Change the range of n for different curves.
     for cid, bc in op.GetUserDataContainer():
-        if cid == c4d.DescID(*[c4d.DescLevel(i) for i in (c4d.ID_USERDATA, 3)]):
+        if cid == DescID(c4d.ID_USERDATA, 3):
             bc[c4d.DESC_MINSLIDER] = curve["range"][0]
             bc[c4d.DESC_MAXSLIDER] = curve["range"][1]
             op.SetUserDataContainer(cid, bc)
@@ -17,7 +18,7 @@ def init():
 init()
 
 def main():
-    curve = database["curves"][op[c4d.ID_USERDATA, 2]]
+    curve = Tree.database["curves"][op[c4d.ID_USERDATA, 2]]
     tree = Tree({
         O.mospline: {
             c4d.MGMOSPLINEOBJECT_MODE: c4d.MGMOSPLINEOBJECT_MODE_TURTLE,
@@ -32,11 +33,11 @@ def main():
 
 def message(id, data):
     if id == c4d.MSG_DESCRIPTION_CHECKUPDATE:
-        if data["descid"] == c4d.DescID(*[c4d.DescLevel(i) for i in (c4d.ID_USERDATA, 2)]):
+        if data["descid"] == DescID(c4d.ID_USERDATA, 2):
             init()
 """
 if __name__ == "__main__":
-    database["curves"] = curves = [
+    Tree.database["curves"] = curves = [
         {
             "name": "Default Tree",
             "premise": "^(90)FFFA",
@@ -245,31 +246,59 @@ if __name__ == "__main__":
         O.python @ "Fractal Generator": {
             c4d.OPYTHON_CODE: code,
             c4d.ID_USERDATA: {
-                "Fractals": {
-                    "Curve": {
-                        c4d.DTYPE_: c4d.DTYPE_LONG,
-                        c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_CYCLE,
-                        c4d.DESC_CYCLE: {i: v["name"] for i, v in enumerate(curves)},
-                    },
-                    "n": {
-                        c4d.DTYPE_: c4d.DTYPE_LONG,
-                        c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_LONGSLIDER,
-                        c4d.DESC_UNIT: c4d.DESC_UNIT_LONG,
-                        c4d.DESC_DEFAULT: 2,
-                        c4d.DESC_MINSLIDER: 0,
-                        c4d.DESC_MAXSLIDER: 15,
-                    },
-                    "Premise": {
-                        c4d.DTYPE_: c4d.DTYPE_STRING,
-                        c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_STRING,
-                    },
-                    "Rules": {
-                        c4d.DTYPE_: c4d.DTYPE_STRING,
-                        c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_STRINGMULTI,
-                    },
-                }
+                (c4d.ID_USERDATA, 1): {
+                    c4d.DTYPE_: c4d.DTYPE_GROUP,
+                    c4d.DESC_NAME: 'Fractals',
+                    c4d.DESC_SHORT_NAME: 'Fractals',
+                    c4d.DESC_PARENTGROUP: (),
+                    c4d.DESC_TITLEBAR: 1,
+                },
+                (c4d.ID_USERDATA, 2): {
+                    c4d.DTYPE_: c4d.DTYPE_LONG,
+                    c4d.DESC_NAME: 'Curve',
+                    c4d.DESC_SHORT_NAME: 'Curve',
+                    c4d.DESC_MIN: -2147483648,
+                    c4d.DESC_MAX: 2147483647,
+                    c4d.DESC_MINEX: 0,
+                    c4d.DESC_MAXEX: 0,
+                    c4d.DESC_STEP: 1,
+                    c4d.DESC_UNIT: c4d.DESC_UNIT_INT,
+                    c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_CYCLE,
+                    c4d.DESC_PARENTGROUP: ((700, 5, 0), (1, 1, 0)),
+                    c4d.DESC_CYCLE: {i: v["name"] for i, v in enumerate(curves)},
+                },
+                (c4d.ID_USERDATA, 3): {
+                    c4d.DTYPE_: c4d.DTYPE_LONG,
+                    c4d.DESC_NAME: 'n',
+                    c4d.DESC_SHORT_NAME: 'n',
+                    c4d.DESC_MIN: -2147483648,
+                    c4d.DESC_MAX: 2147483647,
+                    c4d.DESC_MINEX: 0,
+                    c4d.DESC_MAXEX: 0,
+                    c4d.DESC_STEP: 1,
+                    c4d.DESC_UNIT: c4d.DESC_UNIT_INT,
+                    c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_LONGSLIDER,
+                    c4d.DESC_PARENTGROUP: ((700, 5, 0), (1, 1, 0)),
+                    c4d.DESC_DEFAULT: 2,
+                    c4d.DESC_MINSLIDER: 0,
+                    c4d.DESC_MAXSLIDER: 8,
+                },
+                (c4d.ID_USERDATA, 4): {
+                    c4d.DTYPE_: c4d.DTYPE_STRING,
+                    c4d.DESC_NAME: 'Premise',
+                    c4d.DESC_SHORT_NAME: 'Premise',
+                    c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_STRING,
+                    c4d.DESC_PARENTGROUP: ((700, 5, 0), (1, 1, 0)),
+                },
+                (c4d.ID_USERDATA, 5): {
+                    c4d.DTYPE_: c4d.DTYPE_STRING,
+                    c4d.DESC_NAME: 'Rules',
+                    c4d.DESC_SHORT_NAME: 'Rules',
+                    c4d.DESC_CUSTOMGUI: c4d.CUSTOMGUI_STRINGMULTI,
+                    c4d.DESC_PARENTGROUP: ((700, 5, 0), (1, 1, 0)),
+                },
             },
         },
     })
     doc.Flush()
-    tree.load().print()
+    tree.load()

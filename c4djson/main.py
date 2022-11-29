@@ -1,3 +1,4 @@
+"""Deprecated, used `c4djson.core` instead."""
 import c4d, enum
 
 __all__ = [
