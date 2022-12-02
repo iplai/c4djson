@@ -149,9 +149,16 @@ if __name__ == "__main__":
             "range": (0, 4, 2),
         },
         {
-            "name": "Snowflake",
+            "name": "Traditional Snowflake",
+            "premise": "BBBBBBBB",
+            "rules": """B = +[A]\nA = F[+F][-F]A""",
+            "baseangle": 45,
+            "range": (0, 8, 3),
+        },
+        {
+            "name": "Koch Snowflake",
             "premise": "F--F--F",
-            "rules": """F="(pow(1/3;(_growth-1))))F+F--F+F""",
+            "rules": """F="(pow(1/3;(_growth-1)))F+F--F+F""",
             "baseangle": 60,
             "range": (0, 8, 3),
         },

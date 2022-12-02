@@ -75,6 +75,10 @@ JSON = dict[Union[Key, int], Union[Val, "JSON"]]
 class Param:
     def __init__(self, descid: c4d.DescID, bl: BL):
         self.descid, self.bl = descid, bl
+        if descid[0].dtype == 0:
+            description = bl.obj.GetDescription(c4d.DESCFLAGS_DESC_0)
+            descid = description.CheckDescID(descid, [bl.obj])
+            self.descid = descid or self.descid
 
     @property
     def description(self):
@@ -147,10 +151,15 @@ class Tree:
                         print("Value:", val)
 
     def ParseTrack(self, param: Param, data: list[Union[tuple, dict]]):
+        track = param.bl.obj.FindCTrack(param.descid)
+        if track is not None:
+            track.Remove()
         track = c4d.CTrack(param.bl.obj, param.descid)
         curve = track.GetCurve()
         trackCategory = track.GetTrackCategory()
         fps = Tree.doc.GetFps()
+        descid = param.descid
+        obj = param.bl.obj
 
         def AddKeyframe(frame: int, value, interpolation=c4d.CINTER_SPLINE):
             keyDict = curve.AddKey(c4d.BaseTime(frame, fps))
@@ -169,8 +178,14 @@ class Tree:
                 AddKeyframe(*item)
             if type(item) == dict:
                 self.ParseParams({BL.FromObj(track): item})
-        param.bl.obj.InsertTrackSorted(track)
-        param.bl.obj[param.descid] = LoadValue(data[0][1], param.bc, self)
+        obj.InsertTrackSorted(track)
+        firstValue = LoadValue(data[0][1], param.bc, self)
+        if descid.GetDepth() == 1:
+            # `SetData` can transfer basic types (e.g. int -> float) implicitly.
+            # This can avoid some weird behaviours.
+            obj.GetDataInstance().SetData(descid[0].id, firstValue)
+        else:
+            obj[descid] = firstValue
         return track
 
     def load(self, replace=True, dumpWhenLoaded=True):
@@ -381,7 +396,7 @@ def LoadUserData(data: dict[tuple[int, int], dict[int]], tree: Tree, bl: BL):
                 continue
             if key == c4d.DESC_PARENTGROUP:
                 bc[key] = DescID(*val)
-            elif key == c4d.DESC_CYCLE:
+            elif key in [c4d.DESC_CYCLE, c4d.DESC_CYCLEICONS]:
                 bc[key] = LoadBaseContainer(val)
             elif key not in valueKeys:
                 bc[key] = val
@@ -680,6 +695,8 @@ def LoadValue(value, bc: c4d.BaseContainer, tree: Tree):
             val = c4d.Vector(x, y, z)
         elif isinstance(val, (int, float)):
             val = c4d.BaseTime(val, fps)
+    elif bc[c4d.DESC_CUSTOMGUI] in [c4d.CUSTOMGUI_REAL, c4d.CUSTOMGUI_REALSLIDER]:
+        val = float(val)
     elif bc[c4d.DESC_CUSTOMGUI] == c4d.CUSTOMGUI_COLOR:
         x, y, z = map(lambda i: i / 255, (val.x, val.y, val.z))
         val = c4d.Vector(x, y, z)
@@ -787,10 +804,12 @@ def DumpPriorityData(priorityData: c4d.PriorityData):
     return result
 
 
-def DumpInExcludeData(inexclude: c4d.InExcludeData):
+def DumpInExcludeData(inExclude: c4d.InExcludeData):
     result: dict[tuple[int, int], BL] = {}
-    for i in range(inexclude.GetObjectCount()):
-        result[(i, inexclude.GetFlags(i))] = BL.FromObj(inexclude.ObjectFromIndex(Tree.doc, i))
+    for i in range(inExclude.GetObjectCount()):
+        obj = inExclude.ObjectFromIndex(Tree.doc, i)
+        if obj is not None:
+            result[(i, inExclude.GetFlags(i))] = BL.FromObj(obj)
     if all(key[1] == 7 for key in result.keys()):
         return [bl for bl in result.values()]
     return result
@@ -953,11 +972,11 @@ def Dict2Str(data: dict, indent=2, depth=0):
 def List2Str(data: list, indent=2, depth=0):
     newline = any(isinstance(v, (tuple, list)) and len(v) > 2 for v in data)
     newline = any(isinstance(v, dict) for v in data)
-    newline = newline or len(data) > 3
-    output = "[\n" if newline else "[ "
+    newline = newline or len(repr(data)) > 50
+    output = "[\n" if newline else "["
     for i, item in enumerate(data):
         s = " " * indent * (depth + 1) if newline else ""
-        e = ",\n" if newline else (", " if i < len(data) - 1 else " ")
+        e = ",\n" if newline else (", " if i < len(data) - 1 else "")
         if isinstance(item, dict):
             item = Dict2Str(item, indent, depth + 1)
         if isinstance(item, tuple):
@@ -972,18 +991,3 @@ def List2Str(data: list, indent=2, depth=0):
 if __name__ == "__main__":
     import importlib, c4djson.core
     importlib.reload(c4djson.core)
-    # print(Dict2Str(DumpDoc()))
-
-    # print(Dict2Str(DumpDirtyParams(doc.GetActiveObject())))
-    # print(Dict2Str(DumpParamDescids(doc.GetActiveObject())))
-    # print(Dict2Str(DumpParamDescids(doc.GetActiveTag())))
-    # print(Dict2Str(DumpParamDetails(doc.GetActiveObject(), DescID(c4d.PRIM_CUBE_LEN))))
-    # print(Dict2Str(DumpParamDetails(doc.GetActiveTag(), DescID((1000998, 1009369, 5687)))))
-    # print(Dict2Str(DumpSelected()))
-    # desc = c4d.Description()
-    # desc.LoadDescription(1018571)
-
-    # for bc, descid, _ in desc:
-    #     print(descid)
-    #     print(Dict2Str(DumpBaseContainer(bc)))
-    #     c4d.DESC_DEFAULT

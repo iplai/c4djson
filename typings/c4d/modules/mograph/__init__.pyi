@@ -378,7 +378,7 @@ class FieldLayer(BaseList2D):
 		"""Initialize self.  See help(type(self)) for accurate signature."""
 
 
-def GeGetMoData(op: BaseObject) -> None:
+def GeGetMoData(op: BaseObject) -> MoData:
 	'''Returns the MoGraph data of an object.'''
 def GeGetMoDataSelection(op: BaseList2D) -> None:
 	'''Returns the MoGraph selection of an object.'''
