@@ -158,7 +158,8 @@ class Tree:
                         print("Value:", val)
 
     def ParseTrack(self, param: Param, data: list[Union[tuple, dict]]):
-        if param.descid[0].dtype == c4d.DTYPE_VECTOR:
+        descid = param.descid
+        if descid[0].dtype == c4d.DTYPE_VECTOR and descid.GetDepth() == 1:
             return self.ParseVectorTrack(param, data)
         track = param.bl.obj.FindCTrack(param.descid)
         if track is not None:
@@ -168,7 +169,6 @@ class Tree:
         trackCategory = track.GetTrackCategory()
         # print(FindIdent(trackCategory, "^CTRACK_CATEGORY_"))
         fps = Tree.doc.GetFps()
-        descid = param.descid
         obj = param.bl.obj
 
         def AddKeyframe(frame: int, value, interpolation=c4d.CINTER_SPLINE):
@@ -219,8 +219,7 @@ class Tree:
                 keyDict = curve.AddKey(c4d.BaseTime(frame, fps))
                 key: c4d.CKey = keyDict["key"]
                 keyIndex = keyDict["nidx"]
-                value = LoadValue(value, bc, self)
-                key.SetValue(curve, value)
+                key.SetValue(curve, LoadValue(value, bc, self))
                 curve.SetKeyDefault(Tree.doc, keyIndex)
                 key.SetInterpolation(curve, interpolation)
 
@@ -235,6 +234,7 @@ class Tree:
         return tracks
 
     def load(self, replace=True, dumpWhenLoaded=True):
+        Command.DeSelectAll()
         doc = Tree.doc
         doc.StartUndo()
         for bl in reversed([i for i in self.data if isinstance(i, BL)]):
