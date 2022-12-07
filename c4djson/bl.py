@@ -1,3 +1,4 @@
+from typing import Union
 import c4d, enum
 
 __all__ = [
@@ -28,7 +29,7 @@ class BL:
 
     def __init__(self, type: Type):
         self.type = type
-        self.obj = c4d.BaseList2D(type.value)
+        self.obj: Union[c4d.BaseList2D, c4d.BaseObject] = c4d.BaseList2D(type.value)
         self.raw = BL.GetRaw(type.value)
 
     def __repr__(self):

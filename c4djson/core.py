@@ -98,13 +98,20 @@ class Tree:
 
     def __init__(self, data: Optional[dict] = None):
         Tree.doc = c4d.documents.GetActiveDocument()
-        self.objects: dict[tuple[int, str], c4d.BaseList2D] = {}
+        self.objects: dict[tuple[int, str], Union[c4d.BaseList2D, c4d.BaseObject]] = {}
         self.data = {} if data is None else data
         self.ParseObjects(self.data)
         self.ParseParams(self.data)
 
     def __getitem__(self, bl: BL):
         return self.objects[bl.link]
+
+    def GetFirstObject(self):
+        if len(self.objects.keys()) == 0:
+            raise RuntimeError("The tree is empty. Can't return the first object.")
+        else:
+            for val in self.objects.values():
+                return val
 
     def ParseObjects(self, data: dict, parent: Optional[BL] = None):
         for key, val in data.items():
@@ -151,12 +158,15 @@ class Tree:
                         print("Value:", val)
 
     def ParseTrack(self, param: Param, data: list[Union[tuple, dict]]):
+        if param.descid[0].dtype == c4d.DTYPE_VECTOR:
+            return self.ParseVectorTrack(param, data)
         track = param.bl.obj.FindCTrack(param.descid)
         if track is not None:
             track.Remove()
         track = c4d.CTrack(param.bl.obj, param.descid)
         curve = track.GetCurve()
         trackCategory = track.GetTrackCategory()
+        # print(FindIdent(trackCategory, "^CTRACK_CATEGORY_"))
         fps = Tree.doc.GetFps()
         descid = param.descid
         obj = param.bl.obj
@@ -188,29 +198,66 @@ class Tree:
             obj[descid] = firstValue
         return track
 
+    def ParseVectorTrack(self, param: Param, data: list[Union[tuple, dict]]):
+        obj = param.bl.obj
+        descid = param.descid
+        isHas, *tracks = obj.GetVectorTracks(descid)
+        for track in tracks:
+            if track is not None:
+                track.Remove()
+        tracks: list[c4d.CTrack] = []
+        fps = Tree.doc.GetFps()
+        for i in range(3):
+            subid = [c4d.VECTOR_X, c4d.VECTOR_Y, c4d.VECTOR_Z][i]
+            desclevel = c4d.DescLevel(subid, c4d.DTYPE_REAL, c4d.DTYPE_VECTOR)
+            descid = c4d.DescID(descid[0], desclevel)
+            track = c4d.CTrack(obj, descid)
+            curve = track.GetCurve()
+            bc = obj.GetDescription(c4d.DESCFLAGS_DESC_0).GetParameter(descid)
+
+            def AddKeyframe(frame: int, value, interpolation=c4d.CINTER_SPLINE):
+                keyDict = curve.AddKey(c4d.BaseTime(frame, fps))
+                key: c4d.CKey = keyDict["key"]
+                keyIndex = keyDict["nidx"]
+                value = LoadValue(value, bc, self)
+                key.SetValue(curve, value)
+                curve.SetKeyDefault(Tree.doc, keyIndex)
+                key.SetInterpolation(curve, interpolation)
+
+            for item in data:
+                if type(item) == tuple:
+                    frame, value = item[0], item[1][i]
+                    cinter = item[2] if len(item) > 2 else c4d.CINTER_SPLINE
+                    AddKeyframe(frame, value, cinter)
+                if type(item) == dict:
+                    self.ParseParams({BL.FromObj(track): item})
+            obj.InsertTrackSorted(track)
+        return tracks
+
     def load(self, replace=True, dumpWhenLoaded=True):
-        self.doc.StartUndo()
+        doc = Tree.doc
+        doc.StartUndo()
         for bl in reversed([i for i in self.data if isinstance(i, BL)]):
             if isinstance(bl.obj, c4d.BaseObject):
                 if replace:
-                    for old in self.doc.GetObjects():
+                    for old in doc.GetObjects():
                         if old.GetName() == bl.obj.GetName() and old.GetType() == bl.type.value:
                             old.Remove()
-                self.doc.InsertObject(bl.obj)
-                self.doc.SetSelection(bl.obj, c4d.SELECTION_ADD)
-                self.doc.AddUndo(c4d.UNDOTYPE_NEWOBJ, bl.obj)
+                doc.InsertObject(bl.obj)
+                doc.SetSelection(bl.obj, c4d.SELECTION_ADD)
+                doc.AddUndo(c4d.UNDOTYPE_NEWOBJ, bl.obj)
             if isinstance(bl.obj, c4d.BaseMaterial):
                 if replace:
-                    old = self.doc.SearchMaterial(bl.name)
+                    old = doc.SearchMaterial(bl.name)
                     if old is not None and old.GetType() == bl.type.value:
                         old.Remove()
                 # When there's no mat in mat manager, the insert operation may lose it's name
-                name = bl.name
-                self.doc.InsertMaterial(bl.obj)
-                self.doc.SetSelection(bl.obj, c4d.SELECTION_ADD)
-                bl.obj.SetName(name)  # Restore it's name
-                self.doc.AddUndo(c4d.UNDOTYPE_NEWOBJ, bl.obj)
-        self.doc.EndUndo()
+                # name = bl.name
+                doc.InsertMaterial(bl.obj, checknames=False)
+                doc.SetSelection(bl.obj, c4d.SELECTION_ADD)
+                # bl.obj.SetName(name)  # Restore it's name
+                doc.AddUndo(c4d.UNDOTYPE_NEWOBJ, bl.obj)
+        doc.EndUndo()
         c4d.EventAdd()
         Command.UnFoldAll()
         if dumpWhenLoaded:
@@ -229,6 +276,9 @@ class Command:
 
     def ClearConsole():
         c4d.CallCommand(13957)
+
+    def DeSelectAll():
+        c4d.CallCommand(100004767)  # Deselect All
 
 
 excludeParamMappings = {

@@ -6,4 +6,5 @@ Description-en-US: Dump and print json from doc with selected active object (in 
 from c4djson.core import *
 
 if __name__ == "__main__":
+    Tree.doc = c4d.documents.GetActiveDocument()
     print(Dict2Str(DumpSelected()))
