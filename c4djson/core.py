@@ -3,6 +3,7 @@ import c4d, re
 from c4djson.bl import *
 
 setattr(c4d, "ID_BASELIST", c4d.Tbaselist2d)
+setattr(c4d, "CUSTOMGUI_QUICKTAB_RADIO", 200000281)
 
 
 class Atom:
@@ -399,7 +400,10 @@ def DumpUserDataDetails(obj: c4d.BaseList2D, descid: c4d.DescID):
     for key, val in details.items():
         key.ident = FindIdent(key.value, "DESC_")
         if key.value in generalMappings:
-            val.ident = FindIdent(val.value, generalMappings[key.value])
+            prefix = generalMappings[key.value]
+            val.ident = FindIdent(val.value, prefix)
+            if val.ident is None:
+                print(f"Found Unknown UserData Value with prefix {prefix}: {val.value}")
     if Key(c4d.DESC_CUSTOMGUI) in details:
         if details[Key(c4d.DESC_CUSTOMGUI)].value in [c4d.CUSTOMGUI_BOOL, c4d.CUSTOMGUI_BITMAPBOOL]:
             for key, val in details.items():
@@ -407,7 +411,10 @@ def DumpUserDataDetails(obj: c4d.BaseList2D, descid: c4d.DescID):
                     key.ident = FindIdent(key.value, f"^BITMAPBOOL_")
                     if key.ident is not None:
                         val.ident = FindIdent(val.value, "^RESOURCEIMAGE_")
-        guiSuffix = details[Key(c4d.DESC_CUSTOMGUI)].ident.split("_")[-1]
+        try:
+            guiSuffix = details[Key(c4d.DESC_CUSTOMGUI)].ident.split("_")[-1]
+        except AttributeError:
+            guiSuffix = ""
     for key, val in details.items():
         if key.ident is None:
             key.ident = FindIdent(key.value, f"^{guiSuffix}")
@@ -418,8 +425,22 @@ def DumpUserDataDetails(obj: c4d.BaseList2D, descid: c4d.DescID):
             valueKeys.append(c4d.DESC_STEP)
         if key.value in valueKeys:
             val.dummy = DumpValue(val.value, descid, bc)
-    result |= {key: val for key, val in details.items() if key.value not in [
-        c4d.DESC_REMOVEABLE, c4d.DESC_EDITABLE, c4d.DESC_VERSION, c4d.DESC_ANIMATE]}
+    filters = {
+        c4d.DESC_REMOVEABLE: 0,
+        c4d.DESC_EDITABLE: 1,
+        c4d.DESC_VERSION: c4d.DESC_VERSION_ALL,
+        c4d.DESC_ANIMATE: 1,
+        c4d.DESC_MINEX: 0,
+        c4d.DESC_MAXEX: 0,
+        c4d.BITMAPBOOL_ACTIVE: c4d.RESOURCEIMAGE_EYEACTIVE,
+        c4d.BITMAPBOOL_INACTIVE: c4d.RESOURCEIMAGE_EYEINACTIVE,
+        c4d.BITMAPBOOL_TRISTATE: c4d.RESOURCEIMAGE_EYETRISTATE,
+    }
+    for key, val in filters.items():
+        KeyObj = Key(key)
+        if KeyObj in details and details[KeyObj].value == val:
+            del details[KeyObj]
+    result |= details
     return result
 
 
@@ -433,7 +454,12 @@ def DumpUserData(data: dict[Key, dict[Key, Val]]):
 
 
 def LoadUserData(data: dict[tuple[int, int], dict[int]], tree: Tree, bl: BL):
-    for item in data.values():
+    obj = bl.obj
+    # totalNumber = max(key[1] for key in data.keys())
+    # for _ in range(totalNumber):
+    #     obj.AddUserData(c4d.GetCustomDataTypeDefault(c4d.DTYPE_GROUP))
+    for descidTuple, item in data.items():
+        descid = DescID(*descidTuple)
         dtype = item[c4d.DTYPE_]
         bc = c4d.GetCustomDataTypeDefault(dtype)
         valueKeys = [
@@ -446,16 +472,53 @@ def LoadUserData(data: dict[tuple[int, int], dict[int]], tree: Tree, bl: BL):
                 continue
             if key == c4d.DESC_PARENTGROUP:
                 bc[key] = DescID(*val)
+            elif key == c4d.DESC_TEMPDESCID:
+                bc[key] = DescID(val)
             elif key in [c4d.DESC_CYCLE, c4d.DESC_CYCLEICONS]:
                 bc[key] = LoadBaseContainer(val)
             elif key not in valueKeys:
+                if val == ():
+                    val = c4d.DescID(0)
                 bc[key] = val
         for key, val in item.items():
             if key in valueKeys:
                 bc[key] = LoadValue(val, bc, tree)
-        descid = bl.obj.AddUserData(bc)
+        obj.SetUserDataContainer(descid, bc)
         if bc[c4d.DESC_DEFAULT] is not None:
-            bl.obj[descid] = bc[c4d.DESC_DEFAULT]
+            obj[descid] = bc[c4d.DESC_DEFAULT]
+
+# def LoadUserData(data: dict[tuple[int, int], dict[int]], tree: Tree, bl: BL):
+#     for item in data.values():
+#         dtype = item[c4d.DTYPE_]
+#         bc = c4d.GetCustomDataTypeDefault(dtype)
+#         valueKeys = [
+#             c4d.DESC_DEFAULT, c4d.DESC_MIN, c4d.DESC_MAX, c4d.DESC_MINSLIDER, c4d.DESC_MAXSLIDER
+#         ]
+#         if dtype != c4d.DTYPE_BOOL:
+#             valueKeys.append(c4d.DESC_STEP)
+#         shouldReset = False
+#         for key, val in item.items():
+#             if key == c4d.DTYPE_:
+#                 continue
+#             if key == c4d.DESC_PARENTGROUP:
+#                 bc[key] = DescID(*val)
+#             elif key == c4d.DESC_TEMPDESCID:
+#                 bc[key] = DescID(val)
+#                 shouldReset = True
+#             elif key in [c4d.DESC_CYCLE, c4d.DESC_CYCLEICONS]:
+#                 bc[key] = LoadBaseContainer(val)
+#             elif key not in valueKeys:
+#                 if val == ():
+#                     val = c4d.DescID(0)
+#                 bc[key] = val
+#         for key, val in item.items():
+#             if key in valueKeys:
+#                 bc[key] = LoadValue(val, bc, tree)
+#         descid = bl.obj.AddUserData(bc)  # This method will lose c4d.DESC_TEMPDESCID
+#         if bc[c4d.DESC_DEFAULT] is not None:
+#             bl.obj[descid] = bc[c4d.DESC_DEFAULT]
+#         if shouldReset:
+#             bl.obj.SetUserDataContainer(descid, bc)
 
 
 def DumpDirtyParams(obj: c4d.BaseList2D, comment=True):
@@ -646,6 +709,8 @@ def DumpDescID(descid: c4d.DescID, desc: c4d.Description):
         return Atom(descid, ident="c4d.DESCID_ROOT")
     levels: list[Atom] = []
     for i in range(descid.GetDepth()):
+        if i == 3:
+            break
         subcid = c4d.DescID(*[descid[j] for j in range(i + 1)])
         subbc = desc.GetParameter(subcid)
         ident = subbc[c4d.DESC_IDENT]
@@ -658,6 +723,9 @@ def DumpDescID(descid: c4d.DescID, desc: c4d.Description):
         levels.append(Atom(subcid[-1].id, ident=ident))
     if len(levels) == 1:
         return levels[0]
+    if len(levels) == 2:
+        if levels[0].value == 700:
+            levels[1].ident = None
     return tuple(levels)
 
 
@@ -680,7 +748,16 @@ def DumpValue(value, descid: c4d.DescID, bc: c4d.BaseContainer):
     if dtype == c4d.DTYPE_BASELISTLINK:
         if value is None:
             return None
-        return BL.FromObj(value)
+        try:
+            return BL.FromObj(value)
+        except AttributeError:
+            print(f"Found Unknown Param Value:")
+            print(Dict2Str({
+                "Type": "BASELISTLINK",
+                "Name": bc[c4d.DESC_NAME],
+                "Value": value,
+            }))
+            return value
     if dtype == c4d.DTYPE_BOOL:
         return bool(value)
     if dtype == c4d.DTYPE_REAL:
@@ -696,6 +773,8 @@ def DumpValue(value, descid: c4d.DescID, bc: c4d.BaseContainer):
             value = c4d.Vector(x, y, z)
         return DumpVector(value)
     if dtype == c4d.DTYPE_LONG:
+        if type(value) == float:
+            value = round(value)
         if descid[-1].id == c4d.FIELD_TYPE:
             return Atom(value, ident=FindIdent(value, "^F"))
         if (cyclesymbols := bc[c4d.DESC_CYCLESYMBOLS]):
@@ -794,7 +873,7 @@ def LoadColor(value: tuple):
     return c4d.Vector(x / 255, y / 255, z / 255)
 
 
-def DumpBaseContainer(bc: c4d.BaseContainer):
+def DumpBaseContainer(bc: c4d.BaseContainer) -> JSON:
     result: JSON = {}
     for key, val in bc:
         key = Key(key)

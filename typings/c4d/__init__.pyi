@@ -163,6 +163,8 @@ class Vector(object):
 		"""Return self%value."""
 	def __mul__(self, other: 'Union[int, float, Vector, Matrix]') -> 'Union[Vector, float]':
 		"""Return self*value."""
+	def __truediv__(self, other: 'Union[int, float]') -> 'Vector':
+		"""Divides each vector component by a scalar."""
 	def __ne__(self, other: 'Vector') -> 'bool':
 		"""Return self!=value."""
 	def __neg__(self) -> 'Vector':
@@ -1651,7 +1653,7 @@ class SplineObject(PointObject):
 	"""Spline object class."""
 	def GetInterpolationType(self) -> 'int':
 		"""Get the spline point at a position along the given segment."""
-	def GetSegment(self, id: 'int') -> 'None':
+	def GetSegment(self, id: 'int') -> dict[str, Union[int,bool]]: # dict["cnt": int, "closed": bool]
 		"""Get the segment."""
 	def GetSegmentCount(self) -> 'int':
 		"""Count the segments."""
@@ -2358,8 +2360,6 @@ def PrefsLib_OpenDialog(page: int) -> bool:
 def RestartMe(param: str, exitcode: int) -> bool:
 	'''Private.'''
 def GetCustomDataTypeDefault(type: int) -> BaseContainer:
-	'''Returns default container for custom datatypes'''
-def GetCustomDatatypeDefault(type: Any):
 	'''Returns default container for custom datatypes'''
 def CopyStringToClipboard(text: str) -> None:
 	'''Copies a text to the clipboard.'''
